@@ -48,7 +48,7 @@ class DatabaseService {
   }
 
   get users(): Collection<User> {
-    return this.db.collection(process.env.DB_USER_COLLECTION as string)
+    return this.db.collection(process.env.DB_USERS_COLLECTION as string)
   }
 }
 
