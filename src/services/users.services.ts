@@ -2,6 +2,7 @@ import { config } from 'dotenv'
 import { checkExact } from 'express-validator'
 import { ObjectId } from 'mongodb'
 import { TokenType } from '~/constants/enums'
+import { USERS_MESSAGES } from '~/constants/messages'
 import { RegisterReqBody } from '~/models/requests/User.requests'
 import RefreshToken from '~/models/schemas/RefreshToken.schema'
 import User from '~/models/schemas/User.schema'
@@ -75,6 +76,13 @@ class UsersService {
   async checkEmailExist(email: string) {
     const user = await databaseService.users.findOne({ email })
     return Boolean(user)
+  }
+
+  async logout(refresh_token: string) {
+    const result = await databaseService.refreshToken.deleteOne({ token: refresh_token })
+    return {
+      message: USERS_MESSAGES.LOGOUT_SUCCESS
+    }
   }
 }
 
