@@ -3,11 +3,15 @@ import { defaultErrorHandler } from '~/middlewares/error.middlewares'
 import usersRouter from '~/routes/users.routes'
 import databaseService from '~/services/database.services'
 import mediaRouter from './routes/media.routes'
+import { initFolder } from './utils/file'
 
 databaseService.connect()
 
 const app = express()
 const port = 3000
+
+// Tạo folder upload
+initFolder()
 
 app.use(express.json())
 app.use('/users', usersRouter)
