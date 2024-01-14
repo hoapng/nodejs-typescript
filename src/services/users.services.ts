@@ -118,6 +118,30 @@ class UsersService {
     }
   }
 
+  async refreshToken({
+    user_id,
+    refresh_token,
+    verify
+  }: {
+    user_id: string
+    refresh_token: string
+    verify: UserVerifyStatus
+  }) {
+    const [new_access_token, new_refresh_token] = await this.signAccessAndRefreshToken({ user_id, verify })
+    await databaseService.refreshToken.updateOne(
+      { token: refresh_token },
+      {
+        $set: {
+          token: new_refresh_token
+        }
+      }
+    )
+    return {
+      access_token: new_access_token,
+      refresh_token: new_refresh_token
+    }
+  }
+
   async checkEmailExist(email: string) {
     const user = await databaseService.users.findOne({ email })
     return Boolean(user)
