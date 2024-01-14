@@ -94,7 +94,7 @@ class UsersService {
       verify: UserVerifyStatus.Unverified
     })
 
-    await databaseService.refreshToken.insertOne(
+    await databaseService.refreshTokens.insertOne(
       new RefreshToken({ user_id: new ObjectId(user_id), token: refresh_token })
     )
     console.log('email_verify_token: ', email_verify_token)
@@ -108,7 +108,7 @@ class UsersService {
   async login({ user_id, verify }: { user_id: string; verify: UserVerifyStatus }) {
     const [access_token, refresh_token] = await this.signAccessAndRefreshToken({ user_id, verify })
 
-    await databaseService.refreshToken.insertOne(
+    await databaseService.refreshTokens.insertOne(
       new RefreshToken({ user_id: new ObjectId(user_id), token: refresh_token })
     )
 
@@ -127,8 +127,8 @@ class UsersService {
     refresh_token: string
     verify: UserVerifyStatus
   }) {
-    const [new_access_token, new_refresh_token] = await this.signAccessAndRefreshToken({ user_id, verify })
-    await databaseService.refreshToken.updateOne(
+    const [access_token, new_refresh_token] = await this.signAccessAndRefreshToken({ user_id, verify })
+    await databaseService.refreshTokens.updateOne(
       { token: refresh_token },
       {
         $set: {
@@ -137,7 +137,7 @@ class UsersService {
       }
     )
     return {
-      access_token: new_access_token,
+      access_token: access_token,
       refresh_token: new_refresh_token
     }
   }
@@ -148,7 +148,7 @@ class UsersService {
   }
 
   async logout(refresh_token: string) {
-    const result = await databaseService.refreshToken.deleteOne({ token: refresh_token })
+    const result = await databaseService.refreshTokens.deleteOne({ token: refresh_token })
     return {
       message: USERS_MESSAGES.LOGOUT_SUCCESS
     }
