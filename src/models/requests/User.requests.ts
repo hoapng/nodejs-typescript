@@ -41,6 +41,10 @@ export interface UpdateMeReqBody {
   cover_photo?: string
 }
 
+export interface GetProfileReqParams {
+  username: string
+}
+
 export interface ResetPasswordReqBody {
   password: string
   confirm_password: string
