@@ -7,6 +7,7 @@ import { initFolder } from './utils/file'
 import { config } from 'dotenv'
 import { UPLOAD_DIR } from './constants/dir'
 import staticRouter from './routes/static.routes'
+import tweetsRouter from './routes/tweet.routes'
 
 config()
 databaseService.connect()
@@ -22,6 +23,7 @@ app.use('/users', usersRouter)
 app.use('/medias', mediaRouter)
 // app.use('/static', express.static(UPLOAD_DIR))
 app.use('/static', staticRouter)
+app.use('/tweets', tweetsRouter)
 app.use(defaultErrorHandler)
 
 app.listen(port, () => {
