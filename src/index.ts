@@ -6,6 +6,7 @@ import mediaRouter from './routes/media.routes'
 import { initFolder } from './utils/file'
 import { config } from 'dotenv'
 import { UPLOAD_DIR } from './constants/dir'
+import staticRouter from './routes/static.routes'
 
 config()
 databaseService.connect()
@@ -19,7 +20,8 @@ initFolder()
 app.use(express.json())
 app.use('/users', usersRouter)
 app.use('/medias', mediaRouter)
-app.use('/static', express.static(UPLOAD_DIR))
+// app.use('/static', express.static(UPLOAD_DIR))
+app.use('/static', staticRouter)
 app.use(defaultErrorHandler)
 
 app.listen(port, () => {
