@@ -10,6 +10,12 @@ export interface RegisterReqBody {
   date_of_birth: string
 }
 
+export interface ChangePasswordReqBody {
+  old_password: string
+  password: string
+  confirm_password: string
+}
+
 export interface FollowReqBody {
   followed_user_id: string
 }
