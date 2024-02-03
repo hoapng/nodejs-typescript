@@ -9,6 +9,7 @@ import { UPLOAD_VIDEO_DIR } from './constants/dir'
 import staticRouter from './routes/static.routes'
 import tweetsRouter from './routes/tweet.routes'
 import bookmarksRouter from './routes/bookmarks.routes'
+import likesRouter from './routes/likes.routes'
 
 config()
 databaseService.connect()
@@ -26,6 +27,7 @@ app.use('/static/video', express.static(UPLOAD_VIDEO_DIR))
 app.use('/static', staticRouter)
 app.use('/tweets', tweetsRouter)
 app.use('/bookmarks', bookmarksRouter)
+app.use('/likes', likesRouter)
 app.use(defaultErrorHandler)
 
 app.listen(port, () => {

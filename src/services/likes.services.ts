@@ -1,16 +1,16 @@
 import { ObjectId, WithId } from 'mongodb'
-import Bookmark from '~/models/schemas/Bookmark.schema'
+import Like from '~/models/schemas/Like.schema'
 import databaseService from '~/services/database.services'
 
-class BookmarkService {
-  async bookmarkTweet(user_id: string, tweet_id: string) {
-    const result = await databaseService.bookmarks.findOneAndUpdate(
+class LikeService {
+  async likeTweet(user_id: string, tweet_id: string) {
+    const result = await databaseService.likes.findOneAndUpdate(
       {
         user_id: new ObjectId(user_id),
         tweet_id: new ObjectId(tweet_id)
       },
       {
-        $setOnInsert: new Bookmark({
+        $setOnInsert: new Like({
           user_id: new ObjectId(user_id),
           tweet_id: new ObjectId(tweet_id)
         })
@@ -20,16 +20,15 @@ class BookmarkService {
         returnDocument: 'after'
       }
     )
-    return result as WithId<Bookmark>
+    return result as WithId<Like>
   }
-
-  async unbookmarkTweet(user_id: string, tweet_id: string) {
-    await databaseService.bookmarks.findOneAndDelete({
+  async unlikeTweet(user_id: string, tweet_id: string) {
+    await databaseService.likes.findOneAndDelete({
       user_id: new ObjectId(user_id),
       tweet_id: new ObjectId(tweet_id)
     })
   }
 }
 
-const bookmarkService = new BookmarkService()
-export default bookmarkService
+const likeService = new LikeService()
+export default likeService
