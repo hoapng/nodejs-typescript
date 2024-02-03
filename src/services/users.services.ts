@@ -1,3 +1,4 @@
+import axios from 'axios'
 import { config } from 'dotenv'
 import { checkExact } from 'express-validator'
 import { ObjectId } from 'mongodb'
@@ -162,11 +163,80 @@ class UsersService {
     return Boolean(user)
   }
 
-  async oauth() {
-    // const { iat, exp } = await this.decodeRefreshToken(refresh_token)
-    // await databaseService.refreshTokens.insertOne(
-    //   new RefreshToken({ user_id: user._id, token: refresh_token, iat, exp })
-    // )
+  private async getOauthGoogleToken(code: string) {
+    const body = {
+      code,
+      client_id: process.env.GOOGLE_CLIENT_ID,
+      client_secret: process.env.GOOGLE_CLIENT_SECRET,
+      redirect_uri: process.env.GOOGLE_REDIRECT_URI,
+      grant_type: 'authorization_code'
+    }
+    const { data } = await axios.post('https://oauth2.googleapis.com/token', body, {
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      }
+    })
+    return data as {
+      access_token: string
+      id_token: string
+    }
+  }
+
+  private async getGoogleUserInfo(access_token: string, id_token: string) {
+    const { data } = await axios.get('https://www.googleapis.com/oauth2/v3/userinfo', {
+      params: {
+        access_token,
+        alt: 'json'
+      },
+      headers: {
+        Authorization: `Bearer ${id_token}`
+      }
+    })
+    // console.log('data: ', data)
+    return data
+  }
+
+  async oauth(code: string) {
+    const { access_token, id_token } = await this.getOauthGoogleToken(code)
+    const userInfo = await this.getGoogleUserInfo(access_token, id_token)
+    // console.log('userInfo: ', userInfo)
+    if (!userInfo.email_verified) {
+      throw new ErrorWithStatus({
+        message: USERS_MESSAGES.GMAIL_NOT_VERIFIED,
+        status: HTTP_STATUS.UNAUTHORIZED
+      })
+    }
+    // Kiểm tra email đã được đăng ký chưa
+    const user = await databaseService.users.findOne({ email: userInfo.email })
+    // Nếu tồn tại thì cho login vào
+    if (user) {
+      const [access_token, refresh_token] = await this.signAccessAndRefreshToken({
+        user_id: user._id.toString(),
+        verify: user.verify
+      })
+      const { iat, exp } = await this.decodeRefreshToken(refresh_token)
+      await databaseService.refreshTokens.insertOne(
+        new RefreshToken({ user_id: user._id, token: refresh_token, iat, exp })
+      )
+      return {
+        access_token,
+        refresh_token,
+        newUser: 0,
+        verify: user.verify
+      }
+    } else {
+      // random string password
+      const password = Math.random().toString(36).substring(2, 15)
+      // không thì đăng ký
+      const data = await this.register({
+        email: userInfo.email,
+        name: userInfo.name,
+        date_of_birth: new Date().toISOString(),
+        password,
+        confirm_password: password
+      })
+      return { ...data, newUser: 1, verify: UserVerifyStatus.Unverified }
+    }
   }
 
   async login({ user_id, verify }: { user_id: string; verify: UserVerifyStatus }) {
