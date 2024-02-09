@@ -24,6 +24,7 @@ class TweetsService {
     // console.log(hashtagDocuemts)
     return hashtagDocuemts.map((hashtag) => (hashtag as WithId<Hashtag>)._id)
   }
+
   async createTweet(user_id: string, body: TweetRequestBody) {
     const hashtags = await this.checkAndCreateHashtags(body.hashtags)
     const result = await databaseService.tweets.insertOne(
@@ -40,6 +41,16 @@ class TweetsService {
     )
     const tweet = await databaseService.tweets.findOne({ _id: result.insertedId })
     return tweet
+  }
+
+  async increaseView(tweet_id?: string, user_id?: string) {
+    const inc = user_id ? { user_views: 1 } : { guest_views: 1 }
+    const result = await databaseService.tweets.findOneAndUpdate(
+      { _id: new ObjectId(tweet_id) },
+      { $inc: inc, $currentDate: { updated_at: true } },
+      { returnDocument: 'after', projection: { user_views: 1, guest_views: 1 } }
+    )
+    return result as WithId<{ user_views: number; guest_views: number }>
   }
 }
 
