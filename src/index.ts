@@ -10,6 +10,7 @@ import staticRouter from './routes/static.routes'
 import tweetsRouter from './routes/tweet.routes'
 import bookmarksRouter from './routes/bookmarks.routes'
 import likesRouter from './routes/likes.routes'
+// import '~/utils/faker'
 
 config()
 databaseService.connect()
