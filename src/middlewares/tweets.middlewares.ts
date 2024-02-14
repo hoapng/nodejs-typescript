@@ -293,16 +293,26 @@ export const getTweetChildrenValidator = validate(
     {
       tweet_type: {
         isIn: {
-          options: [TweetType],
+          options: [tweetTypes],
           errorMessage: TWEETS_MESSAGES.INVALID_TYPE
         }
-      },
+      }
+    },
+    ['query']
+  )
+)
+
+export const paginationValidator = validate(
+  checkSchema(
+    {
       limit: {
         isNumeric: true,
         custom: {
           options: async (value, { req }) => {
             const num = Number(value)
-            if (num < 1 || num > 100) throw new Error(TWEETS_MESSAGES.INVALID_LIMIT)
+            if (num > 100 || num < 1) {
+              throw new Error('1 <= limit <= 100')
+            }
             return true
           }
         }
@@ -312,7 +322,9 @@ export const getTweetChildrenValidator = validate(
         custom: {
           options: async (value, { req }) => {
             const num = Number(value)
-            if (num < 1) throw new Error(TWEETS_MESSAGES.INVALID_PAGE)
+            if (num < 1) {
+              throw new Error('page >= 1')
+            }
             return true
           }
         }
