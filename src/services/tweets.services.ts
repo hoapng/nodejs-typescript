@@ -208,7 +208,7 @@ class TweetsService {
       .find({ user_id: user_id_obj }, { projection: { followed_user_id: 1, _id: 0 } })
       .toArray()
     const ids = followed_user_ids.map((item) => item.followed_user_id)
-    // Mong muốn newfees sẽ lấy luôn cả tweet của mình
+    // Mong muốn newfeeds sẽ lấy luôn cả tweet của mình
     ids.push(user_id_obj)
     const [tweets, total] = await Promise.all([
       databaseService.tweets
