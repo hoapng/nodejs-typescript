@@ -21,7 +21,8 @@ export const handleUploadImage = async (req: Request) => {
     uploadDir: UPLOAD_IMAGE_TEMP_DIR,
     maxFiles: 4,
     keepExtensions: true,
-    maxFileSize: 300 * 1024 * 4, // 300KB * 4
+    maxFileSize: 300 * 1024, // 300KB
+    maxTotalFileSize: 300 * 1024 * 4,
     filter: function ({ name, originalFilename, mimetype }) {
       const valid = name === 'image' && Boolean(mimetype?.includes('image/'))
       if (!valid) {
@@ -35,6 +36,7 @@ export const handleUploadImage = async (req: Request) => {
       if (err) {
         return reject(err)
       }
+      // eslint-disable-next-line no-extra-boolean-cast
       if (!Boolean(files.image)) {
         return reject(new Error('File is empty'))
       }
